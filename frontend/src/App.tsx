@@ -5,19 +5,19 @@ import LoginPage from "./pages/Login";
 import RegisterPage from "./pages/Register";
 import LogoutPage from "./pages/Logout";
 import SearchPage from "./pages/Search";
-import Profile from "./pages/Profile.tsx";
+import Profile from "./pages/Profile";
 import NewPhoto from "./pages/NewPhoto";
 import NewPost from "./pages/NewPost";
 import PhotoPage from "./pages/PhotoPage";
 import PostPage from "./pages/PostPage";
-import EditPost from "./pages/EditPost.tsx";
-import EditPhoto from "./pages/EditPhoto.tsx";
+import EditPost from "./pages/EditPost";
+import EditPhoto from "./pages/EditPhoto";
 import FollowersPage from "./pages/FollowersPage";
-import ChatListPage from "./pages/ChatListPage.tsx";
-import ChatPage from "./pages/ChatPage.tsx";
+import ChatListPage from "./pages/ChatListPage";
+import ChatPage from "./pages/ChatPage";
 import StartPrivateRedirect from "./pages/StartPrivateRedirect";
-import GroupChatCreatePage from "./pages/GroupChatCreatePage.tsx";
-import ProfileEditPage from "./pages/ProfileEditPage.tsx";
+import GroupChatCreatePage from "./pages/GroupChatCreatePage";
+import ProfileEditPage from "./pages/ProfileEditPage";
 
 
 const App: React.FC = () => (
