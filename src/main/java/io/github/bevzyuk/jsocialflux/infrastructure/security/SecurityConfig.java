@@ -97,7 +97,7 @@ public class SecurityConfig {
         CorsConfiguration cfg = new CorsConfiguration();
         cfg.setAllowedOriginPatterns(List.of(originsCsv.split("\\s*,\\s*")));
         cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
-        cfg.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With"));
+        cfg.setAllowedHeaders(List.of("*"));
         cfg.setAllowCredentials(true);
         cfg.setMaxAge(3600L);
 
