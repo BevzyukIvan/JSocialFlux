@@ -4,6 +4,7 @@ import io.github.bevzyuk.jsocialflux.application.service.UserService;
 import io.github.bevzyuk.jsocialflux.domain.user.Role;
 import io.github.bevzyuk.jsocialflux.domain.user.User;
 import io.github.bevzyuk.jsocialflux.infrastructure.persistence.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +29,8 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
@@ -39,6 +42,7 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+                .cors(c -> {})
 
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint((exchange, ex) ->
@@ -84,6 +88,22 @@ public class SecurityConfig {
                 )
                 .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
+    }
+
+    @Bean
+    public CorsWebFilter corsWebFilter(
+            @Value("${app.cors.origins:*}") String originsCsv
+    ) {
+        CorsConfiguration cfg = new CorsConfiguration();
+        cfg.setAllowedOriginPatterns(List.of(originsCsv.split("\\s*,\\s*")));
+        cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+        cfg.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With"));
+        cfg.setAllowCredentials(true);
+        cfg.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", cfg);
+        return new CorsWebFilter(source);
     }
 
     @Bean
