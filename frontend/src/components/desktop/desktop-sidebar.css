@@ -1,0 +1,64 @@
+:root {
+    --ds-w: 240px;
+    --ds-link-fs: 16px;       /* базовий розмір шрифту лінків */
+    --ds-link-pad-y: 12px;    /* вертикальні відступи */
+    --ds-link-pad-x: 14px;    /* горизонтальні відступи */
+}
+
+@media (min-width: 992px) {
+    .ds-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--ds-w);
+        height: 100vh;
+        background: #fff;
+        border-right: 1px solid #dbdbdb;
+        z-index: 100;
+        display: block;
+    }
+
+    .ds-inner {
+        padding: 18px; /* було 16px — трохи більше “повітря” */
+    }
+
+    @media (min-width: 992px) {
+        .ds-brand {
+            margin: 0 0 16px;
+            font-size: 28px;    /* було ~20px — тепер помітно більше */
+            font-weight: 650;   /* жирніше */
+            letter-spacing: .2px;
+            line-height: 1.15;
+        }
+    }
+
+    .ds-link {
+        display: block;
+        padding: var(--ds-link-pad-y) var(--ds-link-pad-x);
+        border-radius: 10px;  /* м’якші кути */
+        color: #111;
+        text-decoration: none;
+        font-size: var(--ds-link-fs); /* було дрібніше */
+        font-weight: 500;             /* трохи щільніший текст */
+        line-height: 1.35;
+        transition: background-color .15s ease, color .15s ease;
+        margin-bottom: 6px;           /* збільшив інтервал між пунктами */
+    }
+
+    .ds-link:last-child {
+        margin-bottom: 0;
+    }
+
+    .ds-link:hover {
+        background: #f6f7f9;
+    }
+
+    .ds-link.active {
+        background: #f0f2f4;
+        font-weight: 600;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .ds-sidebar { display: none; }
+}

@@ -1,0 +1,39 @@
+/* Контейнер усього списку — тут і робимо рамку + скруглення */
+.user-list {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;   /* ← круглі кути тільки тут */
+    overflow: hidden;      /* обрізає кути у перших/останніх рядків */
+}
+
+/* Один рядок користувача */
+.user-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #fff;
+
+    /* без зовнішньої рамки, лише горизонтальний роздільник */
+    border: 0;
+    border-bottom: 1px solid #ddd;
+}
+
+/* у останнього — без нижньої лінії */
+.user-card:last-child { border-bottom: 0; }
+
+/* аватар */
+.user-card img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* нік — як звичайний лінк, не жирний */
+.user-card a {
+    font-weight: 400;
+    color: #080f17;
+    text-decoration: none;
+}
+.user-card a:hover { text-decoration: underline; }

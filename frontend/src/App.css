@@ -1,0 +1,4 @@
+.nav{ position:sticky; top:0; z-index:10; background:rgba(15,23,42,.9); backdrop-filter: blur(6px); border-bottom:1px solid #1f2937; }
+.nav-inner{ display:flex; align-items:center; justify-content:space-between; gap:12px; max-width:980px; margin:0 auto; padding:10px 16px; }
+.brand{ font-weight:700; letter-spacing:.3px; }
+.search{ flex:1; }

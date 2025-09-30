@@ -1,0 +1,10 @@
+ALTER TABLE photo
+    ALTER COLUMN description DROP NOT NULL;
+
+UPDATE photo
+SET url = ''
+WHERE url IS NULL;
+
+ALTER TABLE photo
+    ALTER COLUMN url SET NOT NULL;
+

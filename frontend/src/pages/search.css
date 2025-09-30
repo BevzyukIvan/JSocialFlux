@@ -1,0 +1,8 @@
+.search-wrapper { width: 100%; max-width: 500px; }
+.search-box { margin-bottom: 30px; }
+
+/* невеликі відступи зверху на мобілці */
+@media (max-width: 991.98px) {
+    .search-wrapper { padding-top: 12px; }
+    .search-box { margin-top: 20px; margin-left: 12px; margin-right: 12px; }
+}

@@ -1,0 +1,45 @@
+/* десктопний «топбар»: жодної білої смуги — лише правий блок */
+@media (min-width: 992px) {
+    /* сам контейнер: нульова висота, прозорий, без рамок */
+    .dt-topbar {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 0;                /* НЕ займає місця, нічого не зсуває */
+        background: transparent;
+        border: 0;
+        z-index: 1050;
+        pointer-events: none;     /* кліки не ловимо на контейнері */
+    }
+
+    /* а ось цей блок — реальний, «плаває» у правому верхньому куті */
+    .dt-auth {
+        position: fixed;
+        top: 10px;
+        right: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        pointer-events: auto;     /* кліки дозволені лише тут */
+    }
+
+    .dt-avatar {
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .dt-username {
+        text-decoration: none;
+        color: #111;
+        font-weight: 600;
+        max-width: 160px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+/* на мобілці цей файл не діє: там працює MobileTopbar */
+@media (max-width: 991.98px) {
+    .dt-topbar { display: none; }
+}

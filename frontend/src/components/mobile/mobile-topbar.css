@@ -1,0 +1,63 @@
+@media (max-width: 991.98px) {
+    .mt-topbar {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 52px;
+        background: #fff;
+        border-bottom: 1px solid #dbdbdb;
+        z-index: 1050;
+
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 8px;
+    }
+
+    .mt-burger {
+        border: none;
+        background: transparent;
+        padding: 6px 8px;
+        font-size: 22px;
+        line-height: 1;
+    }
+
+    .mt-brand {
+        text-decoration: none;
+        color: #111;
+        font-weight: 700;
+    }
+
+    .mt-actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .mt-user {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        color: #111;
+    }
+
+    .mt-avatar {
+        width: 24px; height: 24px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .mt-username {
+        max-width: 90px;             /* не роз'їдає топбар на довгих логінах */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 600;
+    }
+}
+
+/* На десктопі мобільний топбар не показуємо */
+@media (min-width: 992px) {
+    .mt-topbar { display: none; }
+}

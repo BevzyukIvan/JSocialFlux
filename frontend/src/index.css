@@ -1,0 +1,109 @@
+/* ===== Загальні ===== */
+:root { --sidebar-w: 240px; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+
+/* ===== Auth (login/register) ===== */
+.auth-wrapper{
+    min-height:100vh; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:24px; padding:24px;
+}
+.auth-card{ width:100%; max-width:420px; margin:0 auto; }
+
+
+/* ===== Home layout ===== */
+.main-content { margin-left: var(--sidebar-w); padding: 40px 0; flex-grow: 1; display: flex; justify-content: center; }
+@media (max-width: 991.98px) { .main-content { margin-left: 0; padding-top: 52px; } }
+.feed { width: 100%; max-width: 470px; }
+
+/* ===== Feed cards ===== */
+.photo-card, .post-card {
+    border: 1px solid #dbdbdb; background: #fff; border-radius: 3px; margin-bottom: 24px;
+    position: relative; padding-bottom: 58px;
+}
+.post-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; }
+.post-image-wrapper { position: relative; width: 100%; padding-top: 100%; overflow: hidden; }
+.post-image-wrapper img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.post-meta { padding: 12px 14px 18px; font-size: 14px; overflow-wrap: anywhere; word-break: break-word; }
+.post-meta strong { font-weight: 600; }
+.post-meta .text-muted { font-size: 12px; }
+.delete-btn-wrapper { position: absolute; left: 16px; bottom: 18px; }
+.btn-delete { font-size: 12px; padding: 4px 10px; }
+
+/* ===== Profile page bits ===== */
+.profile-avatar {
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd;
+}
+
+.tab-button.active {
+    font-weight: 600;
+    border-bottom: 2px solid #000;
+}
+
+/* photos grid */
+.profile-photos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.profile-photos-grid .photo-tile {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0;
+}
+.profile-photos-grid .photo-tile img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    transition: transform .2s;
+}
+@media (hover:hover) {
+    .profile-photos-grid .photo-tile img:hover { transform: scale(1.03); }
+}
+/* кнопка видалення поверх фото */
+.tile-delete {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+
+/* posts */
+.profile-posts .post-card {
+    border: 1px solid #dbdbdb;
+    background: #fff;
+    border-radius: 3px;
+    margin-bottom: 24px;
+    padding: 14px;
+    position: relative;
+    padding-bottom: 58px; /* під кнопку */
+}
+.post-content { white-space: pre-wrap; }
+
+/* reuse delete styles */
+.delete-btn-wrapper { position: absolute; left: 16px; bottom: 18px; }
+.btn-delete { font-size: 12px; padding: 4px 10px; }
+
+/* mobile tweaks */
+@media (max-width: 767.98px) {
+    .profile-photos-grid { gap: 2px; }
+    .profile-photos-grid .photo-tile img { aspect-ratio: auto; height: 180px; }
+}
+
+
+
+
+
+/* Вузька форма (upload/create) */
+.form-narrow {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Мобільний відступ зверху під моб-топбар */
+@media (max-width: 991.98px) {
+    .form-narrow { padding: 0 12px; }
+}
+
+
+.comment-entry img { width:48px; height:48px; border-radius:50%; object-fit:cover; }

@@ -1,0 +1,30 @@
+@media (max-width: 991.98px) {
+    .ms-sidebar {
+        position: fixed;
+        top: 0; bottom: 0; left: 0;
+        width: 240px;
+        transform: translateX(-100%);
+        transition: transform .3s ease;
+        z-index: 1040;
+        background: #fff;
+        overflow-y: auto;
+        box-shadow: 2px 0 6px rgba(0,0,0,.08);
+    }
+    .ms-sidebar.show { transform: translateX(0); }
+    .ms-inner { padding: 16px; }
+    .ms-link {
+        display: block; padding: 10px 12px; text-decoration: none; color: #111; border-radius: 8px;
+    }
+    .ms-link.active { background: #f0f2f4; font-weight: 600; }
+
+    .ms-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,.4);
+        display: none; z-index: 1030;
+    }
+    .ms-overlay.show { display: block; }
+}
+
+/* на десктопі не показуємо мобільний сайдбар */
+@media (min-width: 992px) {
+    .ms-sidebar, .ms-overlay { display: none; }
+}
