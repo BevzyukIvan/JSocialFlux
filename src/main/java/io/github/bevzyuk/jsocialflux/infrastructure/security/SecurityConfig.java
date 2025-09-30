@@ -5,6 +5,7 @@ import io.github.bevzyuk.jsocialflux.domain.user.Role;
 import io.github.bevzyuk.jsocialflux.domain.user.User;
 import io.github.bevzyuk.jsocialflux.infrastructure.persistence.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -19,6 +20,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.CorsWebFilter;
@@ -106,24 +108,30 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CommandLineRunner seedUsers(UserRepository users, PasswordEncoder encoder) {
+    @ConditionalOnProperty(prefix = "app.seed-admin", name = "enabled", havingValue = "true")
+    public CommandLineRunner seedAdmin(UserRepository users,
+                                       PasswordEncoder encoder,
+                                       SeedAdminProperties props) {
         return args -> {
-            Flux.range(1, 50)
-                    .map(i -> "user" + i)
-                    .concatMap(username ->
-                            users.existsByUsername(username)
-                                    .flatMap(exists -> {
-                                        if (exists) return Mono.empty();
-                                        User u = new User();
-                                        u.setUsername(username);
-                                        u.setPassword(encoder.encode("password"));
-                                         u.setRole(Role.ROLE_USER);
-                                         u.setAvatar(null);
-                                        return users.save(u);
-                                    })
-                                    .onErrorResume(org.springframework.dao.DataIntegrityViolationException.class, e -> Mono.empty())
-                    )
-                    .then()
+            String username = props.username();
+            String rawPass  = props.password();
+
+            if (!StringUtils.hasText(username) || !StringUtils.hasText(rawPass)) {
+                System.out.println("[SEED] Skipped: username/password not set");
+                return;
+            }
+
+            users.existsByUsername(username)
+                    .flatMap(exists -> {
+                        if (exists) return Mono.empty();
+                        User u = new User();
+                        u.setUsername(username);
+                        u.setPassword(encoder.encode(rawPass));
+                        u.setRole(Role.ROLE_ADMIN);
+                        return users.save(u);
+                    })
+                    .doOnSuccess(__ -> System.out.println("[SEED] Admin ensured: " + username))
+                    .onErrorResume(org.springframework.dao.DataIntegrityViolationException.class, e -> Mono.empty())
                     .subscribe();
         };
     }
