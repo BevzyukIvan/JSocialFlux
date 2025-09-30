@@ -1,12 +1,14 @@
 // frontend/src/api/photos.ts
+
 export type PhotoCardDTO = {
     id: number;
     url: string;
-    uploadedAt: string;      // ISO
+    uploadedAt: string; // ISO
     description: string | null;
 };
 
 const BASE = (import.meta.env.VITE_API_BASE ?? "").trim();
+const url = (path: string) => (BASE ? `${BASE}${path}` : path);
 
 /** Завантажити фото (multipart/form-data) */
 export async function createPhoto(
@@ -15,13 +17,13 @@ export async function createPhoto(
 ): Promise<PhotoCardDTO> {
     const fd = new FormData();
     fd.append("file", file);
-    if (description?.trim()) if (description != null) {
+    if (description && description.trim()) {
         fd.append("description", description.trim());
     }
 
-    const res = await fetch(`${BASE}/api/photos`, {
+    const res = await fetch(url("/api/photos"), {
         method: "POST",
-        body: fd,
+        body: fd,                // не виставляємо Content-Type вручну
         credentials: "include",
     });
     if (!res.ok) throw new Error(`Upload failed (${res.status})`);

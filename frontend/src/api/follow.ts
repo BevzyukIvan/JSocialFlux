@@ -1,4 +1,5 @@
 // frontend/src/api/follow.ts
+
 export type UserItem = {
     username: string;
     avatar: string | null;
@@ -29,25 +30,40 @@ function normalizeSlice(json: any): UserSlice {
         .filter((u: UserItem) => !!u.username);
 
     const hasNext = Boolean(json?.hasNext);
-    const nextCursor = (typeof json?.nextCursor === "number" || json?.nextCursor === null)
-        ? json.nextCursor
-        : null;
+    const nextCursor =
+        typeof json?.nextCursor === "number" || json?.nextCursor === null
+            ? json?.nextCursor
+            : null;
 
     return { items, hasNext, nextCursor };
 }
 
+// ==== Base URL + helpers ====
+const BASE = (import.meta.env.VITE_API_BASE ?? "").trim();
+const url = (path: string) => (BASE ? `${BASE}${path}` : path);
+
+async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
+    const headers = new Headers(init.headers || {});
+    return fetch(url(path), {
+        ...init,
+        headers,
+        credentials: "include",
+    });
+}
+
+// ===== API =====
 export async function fetchFollowers(
     username: string,
     cursor?: number,
     size = 20,
     q = ""
 ): Promise<UserSlice> {
-    const u = new URL(`/api/users/${encodeURIComponent(username)}/followers`, window.location.origin);
+    const u = new URL(url(`/api/users/${encodeURIComponent(username)}/followers`));
     if (cursor != null) u.searchParams.set("cursor", String(cursor));
     u.searchParams.set("size", String(size));
     if (q) u.searchParams.set("q", q);
 
-    const r = await fetch(u.toString(), { headers: { "X-Requested-With": "XMLHttpRequest" } });
+    const r = await apiFetch(u.pathname + (u.search || ""));
     if (!r.ok) throw new Error(`Followers load failed: ${r.status}`);
     return normalizeSlice(await safeJson(r));
 }
@@ -58,12 +74,12 @@ export async function fetchFollowing(
     size = 20,
     q = ""
 ): Promise<UserSlice> {
-    const u = new URL(`/api/users/${encodeURIComponent(username)}/following`, window.location.origin);
+    const u = new URL(url(`/api/users/${encodeURIComponent(username)}/following`));
     if (cursor != null) u.searchParams.set("cursor", String(cursor));
     u.searchParams.set("size", String(size));
     if (q) u.searchParams.set("q", q);
 
-    const r = await fetch(u.toString(), { headers: { "X-Requested-With": "XMLHttpRequest" } });
+    const r = await apiFetch(u.pathname + (u.search || ""));
     if (!r.ok) throw new Error(`Following load failed: ${r.status}`);
     return normalizeSlice(await safeJson(r));
 }

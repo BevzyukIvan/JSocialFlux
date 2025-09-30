@@ -4,19 +4,44 @@ type WireMsg = { type: string; channel?: string };
 type Listener = (data: any) => void;
 
 /**
- * Підключення WS:
- * - через Vite proxy: залиш DIRECT_WS_URL порожнім ('')
- * - напряму до бекенду: вкажи повний URL, напр. 'ws://192.168.0.112:8080/ws'
+ * Джерела URL для WebSocket (пріоритет зверху вниз):
+ * 1) VITE_WS_URL (у .env)
+ * 2) DIRECT_WS_URL (hardcode)
+ * 3) VITE_API_BASE (http/https -> ws/wss) + '/ws'
+ * 4) window.location (протокол ws/wss + '/ws')
  */
-const DIRECT_WS_URL: string | undefined = undefined; // або '' якщо хочеш явно
+const DIRECT_WS_URL: string | undefined = undefined;
 
-export const WS_URL: string = (() => {
-    // гарантуємо строку перед trim()
-    const direct = (DIRECT_WS_URL || '').trim();
+function httpToWs(u: string): string {
+    try {
+        const url = new URL(u);
+        url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+        // якщо шлях порожній або '/', додаємо /ws
+        if (!url.pathname || url.pathname === "/") {
+            url.pathname = "/ws";
+        } else if (!url.pathname.endsWith("/ws")) {
+            // якщо вказали базовий API типу /api — доповнюємо /ws
+            url.pathname = url.pathname.replace(/\/+$/, "") + "/ws";
+        }
+        return url.toString();
+    } catch {
+        // якщо раптом не валідний URL — повернемо як є
+        return u;
+    }
+}
+
+const WS_URL: string = (() => {
+    const envUrl = (import.meta.env.VITE_WS_URL ?? "").trim();
+    if (envUrl) return envUrl;
+
+    const direct = (DIRECT_WS_URL ?? "").trim();
     if (direct) return direct;
 
+    const apiBase = (import.meta.env.VITE_API_BASE ?? "").trim();
+    if (apiBase) return httpToWs(apiBase);
+
     const { protocol, host } = window.location;
-    const proto = protocol === 'https:' ? 'wss:' : 'ws:';
+    const proto = protocol === "https:" ? "wss:" : "ws:";
     return `${proto}//${host}/ws`;
 })();
 
@@ -38,6 +63,13 @@ class WSWrapper {
 
     constructor() {
         this.connect();
+        // При поверненні на вкладку — легкий "кік"
+        document.addEventListener("visibilitychange", () => {
+            if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+            if (document.visibilityState === "visible") {
+                this._send({ type: "PING" });
+            }
+        });
     }
 
     // === public API ===
@@ -49,17 +81,17 @@ class WSWrapper {
     async subscribe(channel: string): Promise<void> {
         if (!channel) return;
         this.subscriptions.add(channel);
-        await this.send({ type: 'SUB', channel });
+        await this.send({ type: "SUB", channel });
     }
 
     async unsubscribe(channel: string): Promise<void> {
         if (!channel) return;
         this.subscriptions.delete(channel);
-        await this.send({ type: 'UNSUB', channel });
+        await this.send({ type: "UNSUB", channel });
     }
 
     ping(): void {
-        void this.send({ type: 'PING' });
+        void this.send({ type: "PING" });
     }
 
     onMessage(fn: Listener): () => void {
@@ -87,22 +119,24 @@ class WSWrapper {
             this.openResolve = () => resolve();
         });
 
-        console.log('[WS] connecting to', WS_URL);
+        console.log("[WS] connecting to", WS_URL);
         const sock = new WebSocket(WS_URL);
         this.ws = sock;
 
         sock.onopen = () => {
-            console.log('[WS] open');
+            console.log("[WS] open");
             this.connecting = false;
             this.retry = 0;
 
             this.openResolve?.();
             this.openResolve = null;
 
+            // Відправляємо буфер
             while (this.queue.length) this._send(this.queue.shift()!);
 
+            // Відновлюємо підписки
             if (this.subscriptions.size) {
-                this.subscriptions.forEach(ch => this._send({ type: 'SUB', channel: ch }));
+                this.subscriptions.forEach((ch) => this._send({ type: "SUB", channel: ch }));
             }
 
             this.startHeartbeat();
@@ -110,39 +144,46 @@ class WSWrapper {
 
         sock.onmessage = (e) => {
             let payload: any = e.data;
-            if (typeof payload === 'string') {
-                try { payload = JSON.parse(payload); }
-                catch {
+            if (typeof payload === "string") {
+                try {
+                    payload = JSON.parse(payload);
+                } catch {
                     const n = Number(payload);
                     if (!Number.isNaN(n)) payload = n;
                 }
             }
-            this.listeners.forEach(fn => {
-                try { fn(payload); } catch {}
+            this.listeners.forEach((fn) => {
+                try {
+                    fn(payload);
+                } catch {
+                    // ignore listener errors
+                }
             });
         };
 
         sock.onerror = (ev) => {
-            console.warn('[WS] error', ev);
+            console.warn("[WS] error", ev);
         };
 
         sock.onclose = (ev) => {
-            console.log('[WS] close', ev.code, ev.reason || '(no reason)');
+            console.log("[WS] close", ev.code, ev.reason || "(no reason)");
             this.clearHeartbeat();
             this.ws = null;
             this.connecting = false;
 
             if (this.manualClosed) return;
 
-            const delay = Math.min(8000, 500 * Math.pow(2, this.retry++));
-            window.setTimeout(() => this.connect(), delay);
+            // експоненційний бекоф + невеликий джиттер
+            const base = Math.min(8000, 500 * Math.pow(2, this.retry++));
+            const jitter = Math.floor(Math.random() * 250);
+            window.setTimeout(() => this.connect(), base + jitter);
         };
     }
 
     private startHeartbeat(): void {
         this.clearHeartbeat();
         this.heartbeatTimer = window.setInterval(() => {
-            this._send({ type: 'PING' });
+            this._send({ type: "PING" });
         }, 25000) as unknown as number;
     }
 
@@ -172,10 +213,11 @@ class WSWrapper {
         try {
             this.ws.send(JSON.stringify(msg));
         } catch (e) {
-            console.warn('[WS] send failed, buffering', e);
+            console.warn("[WS] send failed, buffering", e);
             this.queue.push(msg);
         }
     }
 }
 
 export const WsClient = new WSWrapper();
+export { WS_URL }; // корисно для діагностики/логів

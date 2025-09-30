@@ -1,4 +1,19 @@
+// frontend/src/api/itemDetails.ts
+
 const BASE = (import.meta.env.VITE_API_BASE ?? "").trim();
+const url = (path: string) => (BASE ? `${BASE}${path}` : path);
+
+async function apiFetch(path: string, init: RequestInit = {}) {
+    const headers = new Headers(init.headers || {});
+    if (!headers.has("Content-Type") && init.method && init.method !== "GET") {
+        headers.set("Content-Type", "application/json");
+    }
+    return fetch(url(path), {
+        ...init,
+        headers,
+        credentials: "include",
+    });
+}
 
 export type PhotoResponseDTO = {
     id: number;
@@ -19,35 +34,37 @@ export type PostResponseDTO = {
 };
 
 export async function fetchPhoto(id: number): Promise<PhotoResponseDTO> {
-    const r = await fetch(`${BASE}/api/photos/${id}`, { credentials: "include" });
+    const r = await apiFetch(`/api/photos/${id}`);
     if (!r.ok) throw new Error("Фото не знайдено");
     return r.json();
 }
 
 export async function fetchPost(id: number): Promise<PostResponseDTO> {
-    const r = await fetch(`${BASE}/api/posts/${id}`, { credentials: "include" });
+    const r = await apiFetch(`/api/posts/${id}`);
     if (!r.ok) throw new Error("Пост не знайдено");
     return r.json();
 }
 
-export async function updatePhotoDescription(id: number, description: string) {
-    const res = await fetch(`/api/photos/${id}`, {
+export async function updatePhotoDescription(
+    id: number,
+    description: string
+): Promise<PhotoResponseDTO> {
+    const r = await apiFetch(`/api/photos/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ description }),
     });
-    if (!res.ok) throw new Error(`Помилка ${res.status}`);
-    return (await res.json()) as PhotoResponseDTO;
+    if (!r.ok) throw new Error(`Помилка ${r.status}`);
+    return r.json();
 }
 
-export async function updatePostContent(id: number, content: string) {
-    const res = await fetch(`/api/posts/${id}`, {
+export async function updatePostContent(
+    id: number,
+    content: string
+): Promise<PostResponseDTO> {
+    const r = await apiFetch(`/api/posts/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ content }),
     });
-    if (!res.ok) throw new Error(`Помилка ${res.status}`);
-    return (await res.json()) as PostResponseDTO;
+    if (!r.ok) throw new Error(`Помилка ${r.status}`);
+    return r.json();
 }

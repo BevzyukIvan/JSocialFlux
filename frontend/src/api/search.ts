@@ -1,4 +1,7 @@
+// frontend/src/api/search.ts
+
 const BASE = (import.meta.env.VITE_API_BASE ?? "").trim();
+const url = (path: string) => (BASE ? `${BASE}${path}` : path);
 
 export type UserCardDTO = {
     username: string;
@@ -11,6 +14,16 @@ export type UserSlice = {
     nextCursor: number | null;
 };
 
+async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
+    const headers = new Headers(init.headers || {});
+    headers.set("X-Requested-With", "XMLHttpRequest");
+    return fetch(url(path), {
+        ...init,
+        headers,
+        credentials: "include",
+    });
+}
+
 export async function searchUsers(
     q: string,
     cursor?: number,
@@ -21,9 +34,7 @@ export async function searchUsers(
     if (cursor != null) params.set("cursor", String(cursor));
     params.set("size", String(size));
 
-    const res = await fetch(`${BASE}/api/search?${params.toString()}`, {
-        credentials: "include",
-    });
+    const res = await apiFetch(`/api/search?${params.toString()}`);
     if (!res.ok) throw new Error(`Search failed: ${res.status}`);
-    return (await res.json()) as UserSlice;
+    return res.json() as Promise<UserSlice>;
 }
