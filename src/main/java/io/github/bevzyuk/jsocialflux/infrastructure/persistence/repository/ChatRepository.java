@@ -17,10 +17,10 @@ public interface ChatRepository extends ReactiveCrudRepository<Chat, Long> {
         SELECT
             c.id AS chat_id,
             CASE WHEN c.is_group THEN c.name ELSE other_u.username END AS display_name,
-            CASE WHEN c.is_group THEN c.avatar ELSE other_u.avatar END AS display_avatar,
-            COALESCE(c.is_group, FALSE) AS is_group,
-            lm.content AS last_message,
-            COALESCE(lm.sent_at, c.created_at) AS last_sent_at
+            CASE WHEN c.is_group THEN c.avatar ELSE other_u.avatar END   AS display_avatar,
+            COALESCE(c.is_group, FALSE)                                  AS is_group,
+            lm.content                                                   AS last_message,
+            COALESCE(lm.sent_at, c.created_at)                           AS last_sent_at
         FROM chat c
         JOIN chat_participants cp ON cp.chat_id = c.id
         JOIN users me ON me.id = cp.user_id AND me.username = :currentUsername
@@ -38,9 +38,15 @@ public interface ChatRepository extends ReactiveCrudRepository<Chat, Long> {
             WHERE cp2.chat_id = c.id AND u.username <> :currentUsername
             LIMIT 1
         ) other_u ON TRUE
+    
         WHERE
-            COALESCE(lm.sent_at, c.created_at) < :cursorTime
-            OR (COALESCE(lm.sent_at, c.created_at) = :cursorTime AND c.id < :cursorId)
+            (c.is_group = TRUE OR lm.sent_at IS NOT NULL)
+    
+            AND (
+                COALESCE(lm.sent_at, c.created_at) < :cursorTime
+                OR (COALESCE(lm.sent_at, c.created_at) = :cursorTime AND c.id < :cursorId)
+            )
+    
         ORDER BY COALESCE(lm.sent_at, c.created_at) DESC, c.id DESC
         LIMIT :limit
     """)

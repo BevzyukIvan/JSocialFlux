@@ -33,15 +33,15 @@ public class ChatService {
     private final RealtimeEvents events;
 
     public Mono<ChatSlice> listForUserSlice(String currentUsername, Long cursorEpochMs, Long cursorId, int size) {
-        int page = Math.max(1, Math.min(size, 100));
+        int limit = Math.max(1, Math.min(size, 100));
         Instant cursorTime = (cursorEpochMs == null) ? Instant.now() : Instant.ofEpochMilli(cursorEpochMs);
         Long curId = (cursorId == null) ? Long.MAX_VALUE : cursorId;
 
-        return chatRepository.findChatViewsForUserSlice(currentUsername, cursorTime, curId, page + 1)
+        return chatRepository.findChatViewsForUserSlice(currentUsername, cursorTime, curId, limit + 1)
                 .collectList()
                 .map(list -> {
-                    boolean hasNext = list.size() > page;
-                    if (hasNext) list.remove(page);
+                    boolean hasNext = list.size() > limit;
+                    if (hasNext) list.remove(limit);
 
                     Long nextTime = hasNext ? list.get(list.size() - 1).lastSentAt().toEpochMilli() : null;
                     Long nextId   = hasNext ? list.get(list.size() - 1).chatId()                    : null;

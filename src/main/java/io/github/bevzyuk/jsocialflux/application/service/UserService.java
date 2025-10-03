@@ -89,19 +89,19 @@ public class UserService {
                 });
     }
 
-    public Mono<UsernameDto> updateProfileByUsername(String targetUsername,
-                                                     UpdateProfileCmd cmd,
-                                                     @Nullable FilePart avatar,
-                                                     User current) {
+    public Mono<ProfileUpdateResponse> updateProfileByUsername(String targetUsername,
+                                                               UpdateProfileCmd cmd,
+                                                               @Nullable FilePart avatar,
+                                                               User current) {
         return userRepository.findByUsername(targetUsername)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
                 .flatMap(target -> updateProfileById(target.getId(), cmd, avatar, current));
     }
 
-    public Mono<UsernameDto> updateProfileById(long targetUserId,
-                                               UpdateProfileCmd cmd,
-                                               @Nullable FilePart avatar,
-                                               User current) {
+    public Mono<ProfileUpdateResponse> updateProfileById(long targetUserId,
+                                                         UpdateProfileCmd cmd,
+                                                         @Nullable FilePart avatar,
+                                                         User current) {
         return userRepository.findById(targetUserId)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
                 .filter(u -> accessControlService.canEditUser(u, current))
@@ -124,7 +124,7 @@ public class UserService {
                     return nameCheck
                             .then(Mono.defer(() -> applyUpdates(u, newNameToApply, avatar, cmd.deleteAvatar())))
                             .flatMap(userRepository::save)
-                            .map(saved -> new UsernameDto(saved.getUsername()));
+                            .map(saved -> new ProfileUpdateResponse(saved.getUsername(), saved.getAvatar()));
                 });
     }
 

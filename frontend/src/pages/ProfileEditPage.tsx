@@ -8,7 +8,7 @@ import MobileTopbar from "../components/mobile/MobileTopbar";
 import MobileSidebar from "../components/mobile/MobileSidebar";
 
 import { useAuth } from "../context/AuthContext";
-import { updateProfile } from "../api/users";
+import { updateProfile, ProfileUpdateResponse }  from "../api/users";
 
 const DEF_AVATAR = "/images/default-avatar.png";
 
@@ -88,37 +88,35 @@ const ProfileEditPage: React.FC = () => {
 
     const onSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
-        // блокуємо тільки якщо немає me або не власник і не адмін
         if (!me || (!editingSelf && !isAdmin)) return;
 
         setSaving(true);
         setErr(null);
         try {
-            // адмін не змінює нік — передамо старий username як payload name (бек усе одно ігнорить, але так чистіше)
             const payloadName = allowEditName ? newUsername.trim() : username;
 
-            // updateProfile повертає НОВЕ ім'я цільового користувача
-            const updatedUsername = await updateProfile(
+            // ТЕПЕР updateProfile повертає { username, avatar }
+            const resp: ProfileUpdateResponse = await updateProfile(
                 username,
                 { newUsername: payloadName, deleteAvatar },
                 avatarFile || undefined
             );
 
-            // ОНОВЛЮЄМО КОНТЕКСТ лише якщо редагуємо СЕБЕ
+            // ОНОВЛЮЄМО КОНТЕКСТ, якщо редагуємо СЕБЕ — одразу побачимо новий аватар у топбарі
             if (editingSelf) {
                 setUser((prev) =>
                     prev
                         ? {
                             ...prev,
-                            username: updatedUsername || prev.username,
-                            avatar: deleteAvatar ? null : prev.avatar,
+                            username: resp.username || prev.username,
+                            avatar: resp.avatar ?? null,
                         }
                         : prev
                 );
             }
 
-            // Навігація на новий профіль цілі (навіть якщо адмін редагував чужий профіль)
-            const nextUser = (updatedUsername || username).trim();
+            // Навігація на актуальну сторінку профілю (цільового користувача)
+            const nextUser = (resp.username || username).trim();
             nav(`/users/${encodeURIComponent(nextUser)}`, { replace: true });
         } catch (ex: any) {
             setErr(ex?.message ?? "Помилка збереження");

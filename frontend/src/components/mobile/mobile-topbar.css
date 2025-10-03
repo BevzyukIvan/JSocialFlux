@@ -1,4 +1,5 @@
 @media (max-width: 991.98px) {
+    /* Базовий контейнер — 3 колонки: ліво / центр / право */
     .mt-topbar {
         position: fixed;
         top: 0; left: 0;
@@ -7,10 +8,22 @@
         border-bottom: 1px solid #dbdbdb;
         z-index: 1050;
 
-        display: flex;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        padding: 0 8px;
+        column-gap: 6px;
+    }
+
+    /* Для chat-режиму центр має бути реально по центру, а праворуч — пусто */
+    .mt-topbar.is-chat {
+        grid-template-columns: auto 1fr auto;
+    }
+
+    .mt-left {
+        display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 0 8px;
     }
 
     .mt-burger {
@@ -27,19 +40,12 @@
         font-weight: 700;
     }
 
-    .mt-actions {
-        margin-left: auto;
-        display: flex;
+    /* Центр */
+    .mt-center {
+        justify-self: center;
+        display: inline-flex;
         align-items: center;
-        gap: 6px;
-    }
-
-    .mt-user {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        text-decoration: none;
-        color: #111;
+        gap: 8px;
     }
 
     .mt-avatar {
@@ -47,17 +53,47 @@
         border-radius: 50%;
         object-fit: cover;
     }
+    .mt-avatar--chat { width: 28px; height: 28px; }
 
-    .mt-username {
-        max-width: 90px;             /* не роз'їдає топбар на довгих логінах */
+    .mt-chat-title {
+        font-weight: 700;
+        max-width: 56vw;          /* захист від довгих назв */
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    /* Праворуч */
+    .mt-right {
+        justify-self: end;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .mt-me {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        color: #111;
+    }
+
+    .mt-me-name {
+        max-width: 90px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
         font-weight: 600;
     }
+
+    .mt-center-link {
+        justify-self: center;
+        text-decoration: none;
+        color: inherit;
+    }
 }
 
-/* На десктопі мобільний топбар не показуємо */
 @media (min-width: 992px) {
     .mt-topbar { display: none; }
 }

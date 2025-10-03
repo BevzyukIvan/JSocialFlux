@@ -3,13 +3,13 @@ package io.github.bevzyuk.jsocialflux.web.controller;
 import io.github.bevzyuk.jsocialflux.web.dto.photo.response.PhotoSlice;
 import io.github.bevzyuk.jsocialflux.web.dto.post.response.PostSlice;
 import io.github.bevzyuk.jsocialflux.web.dto.common.Cursor2;
+import io.github.bevzyuk.jsocialflux.web.dto.user.ProfileUpdateResponse;
 import io.github.bevzyuk.jsocialflux.web.dto.user.UpdateProfileCmd;
 import io.github.bevzyuk.jsocialflux.web.dto.user.UserProfileDTO;
 import io.github.bevzyuk.jsocialflux.domain.user.User;
 import io.github.bevzyuk.jsocialflux.application.service.PhotoService;
 import io.github.bevzyuk.jsocialflux.application.service.PostService;
 import io.github.bevzyuk.jsocialflux.application.service.UserService;
-import io.github.bevzyuk.jsocialflux.web.dto.user.UsernameDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -62,7 +62,7 @@ public class UserProfileController {
 
     @PutMapping(path = "/{username}",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Mono<ResponseEntity<UsernameDto>> update(
+    public Mono<ResponseEntity<ProfileUpdateResponse>> update(
             @PathVariable String username,
             @RequestPart("payload") Mono<UpdateProfileCmd> reqMono,
             @RequestPart(name = "avatar", required = false) Mono<FilePart> avatarMono,

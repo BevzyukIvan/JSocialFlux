@@ -5,6 +5,7 @@ import MobileTopbar from "../components/mobile/MobileTopbar";
 import MobileSidebar from "../components/mobile/MobileSidebar";
 import { register } from "../api/auth";
 import { useNavigate } from "react-router-dom";
+import {useAuth} from "../context/AuthContext.tsx";
 
 type FieldErrors = {
     username?: string;
@@ -15,6 +16,7 @@ type FieldErrors = {
 
 const RegisterPage: React.FC = () => {
     const nav = useNavigate();
+    const { refresh } = useAuth();
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -48,6 +50,7 @@ const RegisterPage: React.FC = () => {
         setSubmitting(false);
 
         if (res.ok) {
+            await refresh();                         // 👈 підтягнути me і оновити контекст
             nav("/", { replace: true });
         } else {
             setErrors({ global: res.error || "Не вдалося зареєструватися" });

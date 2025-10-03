@@ -9,13 +9,16 @@ export type UpdateProfileCmd = {
     deleteAvatar: boolean;
 };
 
-type UsernameDto = { username: string };
+export type ProfileUpdateResponse = {
+    username: string;
+    avatar: string | null; // бек повертає актуальний URL або null
+};
 
 export async function updateProfile(
     username: string,
     cmd: UpdateProfileCmd,
     file?: File
-): Promise<string> {
+): Promise<ProfileUpdateResponse> {
     const fd = new FormData();
     fd.append("payload", new Blob([JSON.stringify(cmd)], { type: "application/json" }));
     if (file) fd.append("avatar", file);
@@ -28,13 +31,19 @@ export async function updateProfile(
 
     if (!res.ok) throw new Error(`Update failed: ${res.status}`);
 
-    // Новий бек: 200 + JSON {"username": "..."}
+    // Очікуємо 200 + JSON { username, avatar }
     const ct = res.headers.get("content-type") || "";
-    if (res.status !== 204 && ct.includes("application/json")) {
-        const data = (await res.json()) as UsernameDto;
-        if (data?.username) return data.username;
+    if (ct.includes("application/json")) {
+        const data = (await res.json()) as ProfileUpdateResponse;
+        return {
+            username: data?.username ?? cmd.newUsername?.trim() ?? username,
+            avatar: data?.avatar ?? null,
+        };
     }
 
-    // Фолбек для 204: повертаємо те, що просили встановити (або поточне)
-    return cmd.newUsername?.trim() || username;
+    // Фолбек (якщо раптом 204): повертаємо нове ім'я і avatar:null
+    return {
+        username: cmd.newUsername?.trim() || username,
+        avatar: null,
+    };
 }
