@@ -5,7 +5,7 @@ import MobileTopbar from "../components/mobile/MobileTopbar";
 import MobileSidebar from "../components/mobile/MobileSidebar";
 import { register } from "../api/auth";
 import { useNavigate } from "react-router-dom";
-import {useAuth} from "../context/AuthContext.tsx";
+import {useAuth} from "../context/AuthContext";
 
 type FieldErrors = {
     username?: string;
