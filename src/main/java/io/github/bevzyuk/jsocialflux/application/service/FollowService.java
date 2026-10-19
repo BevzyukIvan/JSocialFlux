@@ -28,14 +28,22 @@ public class FollowService {
         }
         return users.findByUsername(targetName)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                .flatMap(target -> follows.insertFollow(me.getId(), target.getId()))
+                .flatMapMany(target ->
+                        tx.execute(status ->
+                                follows.insertFollow(me.getId(), target.getId()).then()
+                        )
+                )
                 .then();
     }
 
     public Mono<Void> unfollow(User me, String targetName) {
         return users.findByUsername(targetName)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                .flatMap(target -> follows.deleteFollow(me.getId(), target.getId()).then())
+                .flatMapMany(target ->
+                        tx.execute(status ->
+                                follows.deleteFollow(me.getId(), target.getId()).then()
+                        )
+                )
                 .then();
     }
     public Mono<UserSlice> listFollowers(String username, String q, Long cursor, int size) {
